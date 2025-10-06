@@ -1,8 +1,115 @@
 @import "tailwindcss";
 
 :root {
+  /* Base colors */
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Surface colors */
+  --surface: #ffffff;
+  --surface-secondary: #f9fafb;
+  --surface-tertiary: #f3f4f6;
+  
+  /* Border colors */
+  --border: #e5e7eb;
+  --border-secondary: #d1d5db;
+  
+  /* Text colors */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  
+  /* Sentiment colors - Positive */
+  --sentiment-positive-bg: #dcfce7;
+  --sentiment-positive-text: #166534;
+  --sentiment-positive-border: #86efac;
+  --sentiment-positive-accent: #22c55e;
+  
+  /* Sentiment colors - Negative */
+  --sentiment-negative-bg: #fee2e2;
+  --sentiment-negative-text: #991b1b;
+  --sentiment-negative-border: #fca5a5;
+  --sentiment-negative-accent: #ef4444;
+  
+  /* Sentiment colors - Neutral */
+  --sentiment-neutral-bg: #dbeafe;
+  --sentiment-neutral-text: #1e40af;
+  --sentiment-neutral-border: #93c5fd;
+  --sentiment-neutral-accent: #3b82f6;
+  
+  /* Brand colors */
+  --brand-primary: #4f46e5;
+  --brand-primary-hover: #4338ca;
+  --brand-gradient-from: #6366f1;
+  --brand-gradient-to: #9333ea;
+  
+  /* Status colors */
+  --status-success: #10b981;
+  --status-error: #ef4444;
+  --status-warning: #f59e0b;
+  --status-info: #3b82f6;
+  
+  /* Shadow */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Base colors - Deep blacks and dark grays */
+    --background: #121212;
+    --foreground: #e5e5e5;
+    
+    /* Surface colors - True blacks to dark grays */
+    --surface: #0a0a0a;
+    --surface-secondary: #000000;
+    --surface-tertiary: #1a1a1a;
+    
+    /* Border colors - Subtle dark grays */
+    --border: #262626;
+    --border-secondary: #333333;
+    
+    /* Text colors - High contrast whites to grays */
+    --text-primary: #ffffff;
+    --text-secondary: #a3a3a3;
+    --text-tertiary: #737373;
+    
+    /* Sentiment colors - Positive (green) */
+    --sentiment-positive-bg: #052e16;
+    --sentiment-positive-text: #86efac;
+    --sentiment-positive-border: #14532d;
+    --sentiment-positive-accent: #22c55e;
+    
+    /* Sentiment colors - Negative (red) */
+    --sentiment-negative-bg: #450a0a;
+    --sentiment-negative-text: #fca5a5;
+    --sentiment-negative-border: #7f1d1d;
+    --sentiment-negative-accent: #ef4444;
+    
+    /* Sentiment colors - Neutral (blue - strategic use) */
+    --sentiment-neutral-bg: #0a1628;
+    --sentiment-neutral-text: #93c5fd;
+    --sentiment-neutral-border: #1e3a8a;
+    --sentiment-neutral-accent: #3b82f6;
+    
+    /* Brand colors - Blue accent (strategic use only) */
+    --brand-primary: #3b82f6;
+    --brand-primary-hover: #60a5fa;
+    --brand-gradient-from: #2563eb;
+    --brand-gradient-to: #3b82f6;
+    
+    /* Status colors */
+    --status-success: #22c55e;
+    --status-error: #ef4444;
+    --status-warning: #f59e0b;
+    --status-info: #3b82f6;
+    
+    /* Shadow - Deeper for dark theme */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.7);
+  }
 }
 
 @theme inline {
@@ -12,15 +119,41 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+
+.root {
+  isolation: isolate;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7);
+}
+
+@media (prefers-color-scheme: dark) {
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 85, 99, 0.5);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(75, 85, 99, 0.7);
+  }
 }
