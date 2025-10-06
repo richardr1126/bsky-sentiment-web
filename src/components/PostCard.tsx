@@ -1,122 +1,147 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import type { Post } from '@/types/post';
+import type { Post } from "@/types/post";
 
-interface PostCardProps {
-  post: Post;
+type Sentiment = "positive" | "negative" | "neutral" | "unknown";
+
+function sentimentOf(post: Post): Sentiment {
+  const s = post.sentiment?.sentiment as Sentiment | undefined;
+  return s ?? "unknown";
 }
 
-function getSentimentStyles(sentiment: string): React.CSSProperties {
+function palette(sentiment: Sentiment) {
   switch (sentiment) {
-    case 'positive':
+    case "positive":
       return {
-        backgroundColor: 'var(--sentiment-positive-bg)',
-        color: 'var(--sentiment-positive-text)',
-        borderColor: 'var(--sentiment-positive-border)'
+        badgeClasses:
+          "bg-sentiment-positive-bg text-sentiment-positive-text border-sentiment-positive-border",
+        accentClass: "text-sentiment-positive-accent",
+        accentBgClass: "bg-sentiment-positive-accent",
+        emoji: "😊",
       };
-    case 'negative':
+    case "negative":
       return {
-        backgroundColor: 'var(--sentiment-negative-bg)',
-        color: 'var(--sentiment-negative-text)',
-        borderColor: 'var(--sentiment-negative-border)'
+        badgeClasses:
+          "bg-sentiment-negative-bg text-sentiment-negative-text border-sentiment-negative-border",
+        accentClass: "text-sentiment-negative-accent",
+        accentBgClass: "bg-sentiment-negative-accent",
+        emoji: "😞",
       };
-    case 'neutral':
+    case "neutral":
       return {
-        backgroundColor: 'var(--sentiment-neutral-bg)',
-        color: 'var(--sentiment-neutral-text)',
-        borderColor: 'var(--sentiment-neutral-border)'
+        badgeClasses:
+          "bg-sentiment-neutral-bg text-sentiment-neutral-text border-sentiment-neutral-border",
+        accentClass: "text-sentiment-neutral-accent",
+        accentBgClass: "bg-sentiment-neutral-accent",
+        emoji: "😐",
       };
     default:
       return {
-        backgroundColor: 'var(--surface-tertiary)',
-        color: 'var(--text-secondary)',
-        borderColor: 'var(--border)'
+        badgeClasses: "bg-surface-tertiary text-text-secondary border-border",
+        accentClass: "text-brand-primary",
+        accentBgClass: "bg-brand-primary",
+        emoji: "❓",
       };
   }
 }
 
-function getSentimentEmoji(sentiment: string): string {
-  switch (sentiment) {
-    case 'positive':
-      return '😊';
-    case 'negative':
-      return '😞';
-    case 'neutral':
-      return '😐';
-    default:
-      return '❓';
-  }
-}
+export function PostCard({ post }: { post: Post }) {
+  const sentiment = sentimentOf(post);
+  const ui = palette(sentiment);
+  const text = post.text || "No text available";
+  const _confidence = post.sentiment?.confidence ?? 0;
+  const probs = post.sentiment?.probabilities;
+  const authorShort = post.author ? post.author.slice(-8) : "unknown";
 
-export function PostCard({ post }: PostCardProps) {
-  const sentiment = post.sentiment?.sentiment || 'unknown';
-  const confidence = post.sentiment?.confidence || 0;
-  const text = post.text || 'No text available';
-  // Extract a short author identifier from DID (last 8 characters)
-  const authorShort = post.author ? post.author.slice(-8) : 'unknown';
+  const positivePct = probs ? Math.round(probs.positive * 100) : 0;
+  const neutralPct = probs ? Math.round(probs.neutral * 100) : 0;
+  const negativePct = probs ? Math.round(probs.negative * 100) : 0;
+
+  // Sort sentiments by percentage (highest first)
+  const sortedSentiments = probs
+    ? [
+        {
+          label: "positive",
+          pct: positivePct,
+          bg: "bg-sentiment-positive-bg",
+          border: "border-sentiment-positive-border",
+          dot: "bg-sentiment-positive-accent",
+          text: "text-sentiment-positive-text",
+        },
+        {
+          label: "neutral",
+          pct: neutralPct,
+          bg: "bg-sentiment-neutral-bg",
+          border: "border-sentiment-neutral-border",
+          dot: "bg-sentiment-neutral-accent",
+          text: "text-sentiment-neutral-text",
+        },
+        {
+          label: "negative",
+          pct: negativePct,
+          bg: "bg-sentiment-negative-bg",
+          border: "border-sentiment-negative-border",
+          dot: "bg-sentiment-negative-accent",
+          text: "text-sentiment-negative-text",
+        },
+      ].sort((a, b) => b.pct - a.pct)
+    : [];
 
   return (
-    <div className="rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-4 border" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}>
-      {/* Header with sentiment badge */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold" style={{ background: 'linear-gradient(to bottom right, var(--brand-gradient-from), var(--brand-gradient-to))' }}>
+    <article className="border-b border-border bg-surface px-4 py-3 transition-colors hover:bg-surface-secondary/50">
+      {/* Header */}
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0">
+          <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-brand-gradient-from to-brand-gradient-to text-xs font-semibold text-white">
             {authorShort.slice(0, 2).toUpperCase()}
           </div>
-          <div className="text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
-            {authorShort}
-          </div>
         </div>
-        
-        {/* Sentiment badge */}
-        {post.sentiment && (
-          <div className="px-3 py-1 rounded-full text-xs font-semibold border" style={getSentimentStyles(sentiment)}>
-            <span className="mr-1">{getSentimentEmoji(sentiment)}</span>
-            {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
+
+        <div className="min-w-0 flex-1">
+          {/* Author and sentiment */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 min-w-0">
+              <span className="font-bold text-text-primary text-sm truncate">
+                User {authorShort}
+              </span>
+              <div className="flex items-center gap-1.5 text-text-tertiary text-sm">
+                <span>@{authorShort}</span>
+                <span>·</span>
+                <span>now</span>
+              </div>
+            </div>
+
+            <div
+              className={`flex-shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-full border ${ui.badgeClasses}`}
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${ui.accentBgClass}`} />
+              <span className="text-xs font-medium">{sentiment}</span>
+            </div>
           </div>
-        )}
+
+          {/* Post text */}
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-normal text-text-primary">
+            {text}
+          </p>
+
+          {/* Sentiment pills - compact inline, sorted by highest percentage */}
+          {sortedSentiments.length > 0 && (
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              {sortedSentiments.map((s) => (
+                <div
+                  key={s.label}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${s.bg} border ${s.border}`}
+                >
+                  <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                  <span className={`text-xs font-medium ${s.text}`}>
+                    {s.pct}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Post text */}
-      <p className="mb-3 whitespace-pre-wrap break-words" style={{ color: 'var(--text-primary)' }}>
-        {text}
-      </p>
-
-      {/* Footer with confidence */}
-      {post.sentiment && (
-        <div className="flex items-center justify-end text-xs pt-2 border-t" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border)' }}>
-          <span className="font-medium">
-            Confidence: {(confidence * 100).toFixed(1)}%
-          </span>
-        </div>
-      )}
-
-      {/* Probability details */}
-      {post.sentiment?.probabilities && (
-        <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="text-center">
-              <div style={{ color: 'var(--text-secondary)' }}>Positive</div>
-              <div className="font-semibold" style={{ color: 'var(--sentiment-positive-accent)' }}>
-                {(post.sentiment.probabilities.positive * 100).toFixed(1)}%
-              </div>
-            </div>
-            <div className="text-center">
-              <div style={{ color: 'var(--text-secondary)' }}>Neutral</div>
-              <div className="font-semibold" style={{ color: 'var(--sentiment-neutral-accent)' }}>
-                {(post.sentiment.probabilities.neutral * 100).toFixed(1)}%
-              </div>
-            </div>
-            <div className="text-center">
-              <div style={{ color: 'var(--text-secondary)' }}>Negative</div>
-              <div className="font-semibold" style={{ color: 'var(--sentiment-negative-accent)' }}>
-                {(post.sentiment.probabilities.negative * 100).toFixed(1)}%
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </article>
   );
 }

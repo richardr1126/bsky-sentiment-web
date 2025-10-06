@@ -1,74 +1,104 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { PostCard } from './PostCard';
-import type { Post } from '@/types/post';
+import { ScrollArea } from "@base-ui-components/react/scroll-area";
+import { Switch } from "@base-ui-components/react/switch";
+import { Toolbar } from "@base-ui-components/react/toolbar";
+import { Tooltip } from "@base-ui-components/react/tooltip";
+import { ArrowUp } from "lucide-react";
+import * as React from "react";
+import type { Post } from "@/types/post";
+import { PostCard } from "./PostCard";
+
+type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 
 interface PostStreamProps {
   posts: Post[];
   onPostReceived: (post: Post) => void;
+  sentimentFilter: SentimentFilter;
 }
 
-export function PostStream({ posts, onPostReceived }: PostStreamProps) {
+export function PostStream({
+  posts,
+  onPostReceived,
+  sentimentFilter,
+}: PostStreamProps) {
   const [isConnected, setIsConnected] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isPaused, setIsPaused] = React.useState(false);
   const [pendingPostCount, setPendingPostCount] = React.useState(0);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const pendingPostsRef = React.useRef<Post[]>([]);
+  const isResuming = React.useRef(false);
 
-  // Handle scroll to pause/resume
-  React.useEffect(() => {
-    const scrollElement = scrollRef.current;
-    if (!scrollElement) return;
-
-    const handleScroll = () => {
-      const { scrollTop } = scrollElement;
-      // If user scrolled down more than 100px, pause updates
-      if (scrollTop > 100 && !isPaused) {
-        setIsPaused(true);
-      }
-    };
-
-    scrollElement.addEventListener('scroll', handleScroll);
-    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  // Pause when user scrolls down; resume when scrolled back to top.
+  const handleScroll = React.useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const { scrollTop } = el;
+    if (scrollTop > 120 && !isPaused && !isResuming.current) {
+      setIsPaused(true);
+    }
   }, [isPaused]);
 
-  // Handle incoming posts - either add immediately or queue them
-  const handleIncomingPost = React.useCallback((post: Post) => {
-    if (isPaused) {
-      pendingPostsRef.current.push(post);
-      setPendingPostCount(prev => prev + 1);
-    } else {
-      onPostReceived(post);
-    }
-  }, [isPaused, onPostReceived]);
+  React.useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
 
-  // Resume live updates
+  // Handle incoming posts - queue while paused
+  const handleIncomingPost = React.useCallback(
+    (post: Post) => {
+      if (isPaused) {
+        pendingPostsRef.current.push(post);
+        setPendingPostCount((prev) => prev + 1);
+      } else {
+        onPostReceived(post);
+      }
+    },
+    [isPaused, onPostReceived],
+  );
+
+  // Resume stream and flush queued posts
   const handleResume = React.useCallback(() => {
-    // Add all pending posts
-    pendingPostsRef.current.forEach(post => onPostReceived(post));
-    pendingPostsRef.current = [];
+    isResuming.current = true;
+
+    if (pendingPostsRef.current.length) {
+      for (const p of pendingPostsRef.current) onPostReceived(p);
+      pendingPostsRef.current = [];
+    }
     setPendingPostCount(0);
     setIsPaused(false);
-    
-    // Scroll back to top
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (viewportRef.current) {
+      viewportRef.current.scrollTo({ top: 0, behavior: "smooth" });
+      // Reset the flag after scroll completes
+      setTimeout(() => {
+        isResuming.current = false;
+      }, 500); // Match smooth scroll duration
+    } else {
+      isResuming.current = false;
     }
   }, [onPostReceived]);
 
+  // EventSource connection lifecycle
   React.useEffect(() => {
     let eventSource: EventSource | null = null;
 
     const connectToStream = () => {
       try {
-        eventSource = new EventSource('/api/stream');
-        
+        const url =
+          sentimentFilter === "all"
+            ? "/api/stream"
+            : `/api/stream?sentiment=${sentimentFilter}`;
+        eventSource = new EventSource(url);
+
         eventSource.onopen = () => {
-          console.log('Connected to stream');
           setIsConnected(true);
           setError(null);
+          // slight visual pulse is handled in UI
         };
 
         eventSource.onmessage = (event) => {
@@ -76,108 +106,139 @@ export function PostStream({ posts, onPostReceived }: PostStreamProps) {
             const post = JSON.parse(event.data) as Post;
             handleIncomingPost(post);
           } catch (parseError) {
-            console.error('Error parsing post:', parseError);
+            console.error("Error parsing post:", parseError);
           }
         };
 
         eventSource.onerror = (err) => {
-          console.error('EventSource error:', err);
+          console.error("EventSource error:", err);
           setIsConnected(false);
-          setError('Connection lost. Reconnecting...');
-          
-          if (eventSource) {
-            eventSource.close();
-          }
-          
-          // Reconnect after 3 seconds
+          setError("Connection lost. Reconnecting...");
+          if (eventSource) eventSource.close();
           setTimeout(connectToStream, 3000);
         };
       } catch (err) {
-        console.error('Error connecting to stream:', err);
-        setError('Failed to connect to stream');
+        console.error("Error connecting to stream:", err);
+        setError("Failed to connect to stream");
       }
     };
 
     connectToStream();
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
-      }
+      if (eventSource) eventSource.close();
     };
-  }, [handleIncomingPost]);
+  }, [handleIncomingPost, sentimentFilter]);
 
   return (
-    <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: 'var(--surface)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          Live Post Stream
-        </h2>
-        <div className="flex items-center space-x-2">
+    <div className="rounded-xl border border-border bg-surface shadow-md overflow-hidden">
+      {/* Toolbar Header */}
+      <Toolbar.Root className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
           <div
-            className={`w-3 h-3 rounded-full ${
-              isConnected ? 'animate-pulse' : ''
+            className={`h-2 w-2 rounded-full ${
+              isConnected
+                ? "animate-pulse bg-status-success"
+                : "bg-status-error"
             }`}
-            style={{ backgroundColor: isConnected ? 'var(--status-success)' : 'var(--status-error)' }}
+            aria-hidden
           />
-          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            {isConnected ? 'Connected' : 'Disconnected'}
-          </span>
+          <div className="text-sm font-semibold text-text-primary">
+            Live NATS Stream
+          </div>
+          <div className="text-xs text-text-secondary">
+            {isConnected ? "Connected" : "Disconnected"}
+          </div>
         </div>
-      </div>
 
-      {/* Resume button when paused */}
-      {isPaused && pendingPostCount > 0 && (
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleResume}
-            className="w-full px-4 py-3 text-white font-medium rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center space-x-2 group"
-            style={{ backgroundColor: 'var(--brand-primary)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--brand-primary-hover)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--brand-primary)'}
+        <div className="flex items-center gap-3">
+          {/* Resume button - shown when paused with pending posts */}
+          {isPaused && pendingPostCount > 0 && (
+            <button
+              type="button"
+              onClick={handleResume}
+              className="flex items-center gap-1.5 rounded-lg bg-brand-primary px-2 py-1 text-xs font-medium text-white shadow-sm transition-colors hover:opacity-90"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+              {pendingPostCount} new post{pendingPostCount !== 1 ? "s" : ""}
+            </button>
+          )}
+
+          <Tooltip.Provider delay={300}>
+            <Tooltip.Root>
+              <Tooltip.Trigger
+                render={<Toolbar.Button />}
+                className="rounded-md border border-border bg-surface-secondary px-2 py-1 text-xs font-medium text-text-secondary"
+              >
+                {isPaused ? "Paused" : "Live"}
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Positioner side="bottom" align="end" sideOffset={8}>
+                  <Tooltip.Popup className="rounded-md border border-border bg-surface-secondary px-3 py-2 text-xs text-text-primary shadow-lg">
+                    Toggle to pause/resume live updates
+                  </Tooltip.Popup>
+                </Tooltip.Positioner>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+
+          <Switch.Root
+            checked={!isPaused}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                handleResume();
+              } else {
+                setIsPaused(true);
+              }
+            }}
+            className={`relative flex h-5 w-9 items-center rounded-full p-px outline-1 -outline-offset-1 outline-border transition-all ${
+              !isPaused ? "bg-brand-primary" : "bg-surface-tertiary"
+            }`}
           >
-            <span>↑</span>
-            <span>
-              {pendingPostCount} new post{pendingPostCount !== 1 ? 's' : ''} available
-            </span>
-            <span className="text-xs opacity-80 group-hover:opacity-100">• Click to resume</span>
-          </button>
+            <Switch.Thumb className="h-full aspect-square rounded-full bg-white transition-transform duration-150 data-[checked]:translate-x-4 shadow" />
+          </Switch.Root>
         </div>
-      )}
+      </Toolbar.Root>
 
       {/* Error message */}
       {error && (
-        <div className="mb-4 p-3 border rounded-lg" style={{ backgroundColor: 'var(--sentiment-negative-bg)', borderColor: 'var(--sentiment-negative-border)' }}>
-          <p className="text-sm" style={{ color: 'var(--sentiment-negative-text)' }}>{error}</p>
+        <div className="bg-sentiment-negative-bg px-4 py-3">
+          <p className="text-xs font-medium text-sentiment-negative-text">
+            {error}
+          </p>
         </div>
       )}
 
-      {/* Posts container */}
-      <div
-        ref={scrollRef}
-        className="space-y-4 h-[600px] overflow-y-auto pr-2 scrollbar-thin"
-      >
-        {posts.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center" style={{ color: 'var(--text-secondary)' }}>
-              <div className="text-4xl mb-2">📡</div>
-              <p>Waiting for posts...</p>
-            </div>
-          </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post.uri} post={post} />
-          ))
-        )}
-      </div>
+      {/* Scrollable posts */}
+      <ScrollArea.Root className="h-[600px]">
+        <ScrollArea.Viewport
+          ref={viewportRef}
+          className="h-full overscroll-contain outline-none"
+        >
+          <ScrollArea.Content className="flex flex-col">
+            {posts.length === 0 ? (
+              <div className="flex h-[520px] items-center justify-center">
+                <div className="text-center">
+                  <div className="mb-2 text-4xl">📡</div>
+                  <p className="text-sm text-text-secondary">
+                    Waiting for posts...
+                  </p>
+                </div>
+              </div>
+            ) : (
+              posts.map((post) => <PostCard key={post.uri} post={post} />)
+            )}
+          </ScrollArea.Content>
+        </ScrollArea.Viewport>
 
-      {/* Post count */}
-      <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <p className="text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
-          Showing {posts.length} recent post{posts.length !== 1 ? 's' : ''}
-        </p>
+        <ScrollArea.Scrollbar className="m-2 flex w-1 justify-center rounded bg-surface-tertiary opacity-0 transition-opacity delay-300 data-[hovering]:opacity-100 data-[hovering]:delay-0 data-[hovering]:duration-75 data-[scrolling]:opacity-100 data-[scrolling]:delay-0 data-[scrolling]:duration-75">
+          <ScrollArea.Thumb className="w-full rounded bg-text-tertiary" />
+        </ScrollArea.Scrollbar>
+      </ScrollArea.Root>
+
+      {/* Footer count */}
+      <div className="border-t border-border px-4 py-3 text-center text-xs text-text-secondary">
+        Showing {posts.length} recent post{posts.length !== 1 ? "s" : ""}
       </div>
     </div>
   );

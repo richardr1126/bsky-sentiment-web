@@ -4,51 +4,51 @@
   /* Base colors */
   --background: #ffffff;
   --foreground: #171717;
-  
+
   /* Surface colors */
   --surface: #ffffff;
   --surface-secondary: #f9fafb;
   --surface-tertiary: #f3f4f6;
-  
+
   /* Border colors */
   --border: #e5e7eb;
   --border-secondary: #d1d5db;
-  
+
   /* Text colors */
   --text-primary: #111827;
   --text-secondary: #6b7280;
   --text-tertiary: #9ca3af;
-  
+
   /* Sentiment colors - Positive */
   --sentiment-positive-bg: #dcfce7;
   --sentiment-positive-text: #166534;
   --sentiment-positive-border: #86efac;
   --sentiment-positive-accent: #22c55e;
-  
+
   /* Sentiment colors - Negative */
   --sentiment-negative-bg: #fee2e2;
   --sentiment-negative-text: #991b1b;
   --sentiment-negative-border: #fca5a5;
   --sentiment-negative-accent: #ef4444;
-  
+
   /* Sentiment colors - Neutral */
   --sentiment-neutral-bg: #dbeafe;
   --sentiment-neutral-text: #1e40af;
   --sentiment-neutral-border: #93c5fd;
   --sentiment-neutral-accent: #3b82f6;
-  
+
   /* Brand colors */
   --brand-primary: #4f46e5;
   --brand-primary-hover: #4338ca;
   --brand-gradient-from: #6366f1;
   --brand-gradient-to: #9333ea;
-  
+
   /* Status colors */
   --status-success: #10b981;
   --status-error: #ef4444;
   --status-warning: #f59e0b;
   --status-info: #3b82f6;
-  
+
   /* Shadow */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -60,51 +60,51 @@
     /* Base colors - Deep blacks and dark grays */
     --background: #121212;
     --foreground: #e5e5e5;
-    
+
     /* Surface colors - True blacks to dark grays */
     --surface: #0a0a0a;
     --surface-secondary: #000000;
     --surface-tertiary: #1a1a1a;
-    
+
     /* Border colors - Subtle dark grays */
     --border: #262626;
     --border-secondary: #333333;
-    
+
     /* Text colors - High contrast whites to grays */
     --text-primary: #ffffff;
     --text-secondary: #a3a3a3;
     --text-tertiary: #737373;
-    
+
     /* Sentiment colors - Positive (green) */
     --sentiment-positive-bg: #052e16;
     --sentiment-positive-text: #86efac;
     --sentiment-positive-border: #14532d;
     --sentiment-positive-accent: #22c55e;
-    
+
     /* Sentiment colors - Negative (red) */
     --sentiment-negative-bg: #450a0a;
     --sentiment-negative-text: #fca5a5;
     --sentiment-negative-border: #7f1d1d;
     --sentiment-negative-accent: #ef4444;
-    
+
     /* Sentiment colors - Neutral (blue - strategic use) */
     --sentiment-neutral-bg: #0a1628;
     --sentiment-neutral-text: #93c5fd;
     --sentiment-neutral-border: #1e3a8a;
     --sentiment-neutral-accent: #3b82f6;
-    
+
     /* Brand colors - Blue accent (strategic use only) */
     --brand-primary: #3b82f6;
     --brand-primary-hover: #60a5fa;
-    --brand-gradient-from: #2563eb;
-    --brand-gradient-to: #3b82f6;
-    
+    --brand-gradient-from: #4338ca;
+    --brand-gradient-to: #7c3aed;
+
     /* Status colors */
     --status-success: #22c55e;
     --status-error: #ef4444;
     --status-warning: #f59e0b;
     --status-info: #3b82f6;
-    
+
     /* Shadow - Deeper for dark theme */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6);
@@ -113,8 +113,60 @@
 }
 
 @theme inline {
+  /* Base colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Surface colors */
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+
+  /* Border colors */
+  --color-border: var(--border);
+  --color-border-secondary: var(--border-secondary);
+
+  /* Text colors */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+
+  /* Sentiment colors - Positive */
+  --color-sentiment-positive-bg: var(--sentiment-positive-bg);
+  --color-sentiment-positive-text: var(--sentiment-positive-text);
+  --color-sentiment-positive-border: var(--sentiment-positive-border);
+  --color-sentiment-positive-accent: var(--sentiment-positive-accent);
+
+  /* Sentiment colors - Negative */
+  --color-sentiment-negative-bg: var(--sentiment-negative-bg);
+  --color-sentiment-negative-text: var(--sentiment-negative-text);
+  --color-sentiment-negative-border: var(--sentiment-negative-border);
+  --color-sentiment-negative-accent: var(--sentiment-negative-accent);
+
+  /* Sentiment colors - Neutral */
+  --color-sentiment-neutral-bg: var(--sentiment-neutral-bg);
+  --color-sentiment-neutral-text: var(--sentiment-neutral-text);
+  --color-sentiment-neutral-border: var(--sentiment-neutral-border);
+  --color-sentiment-neutral-accent: var(--sentiment-neutral-accent);
+
+  /* Brand colors */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-gradient-from: var(--brand-gradient-from);
+  --color-brand-gradient-to: var(--brand-gradient-to);
+
+  /* Status colors */
+  --color-status-success: var(--status-success);
+  --color-status-error: var(--status-error);
+  --color-status-warning: var(--status-warning);
+  --color-status-info: var(--status-info);
+
+  /* Shadow */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

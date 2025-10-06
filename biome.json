@@ -20,6 +20,20 @@
       "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off"
+      },
+      "a11y": {
+        "useButtonType": "error",
+        "useKeyWithClickEvents": "error",
+        "useKeyWithMouseEvents": "error",
+        "noAccessKey": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "useHookAtTopLevel": "error"
+      },
+      "complexity": {
+        "noUselessFragments": "error",
+        "useSimplifiedLogicExpression": "warn"
       }
     },
     "domains": {

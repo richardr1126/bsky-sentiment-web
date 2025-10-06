@@ -1,5 +1,5 @@
 export interface SentimentData {
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: "positive" | "negative" | "neutral";
   confidence: number;
   probabilities: {
     positive: number;

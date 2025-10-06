@@ -6,9 +6,13 @@ A real-time sentiment analysis dashboard for Bluesky posts, built with Next.js, 
 
 - **Real-time Post Stream**: Watch Bluesky posts flow in as they're analyzed
 - **Live Sentiment Analytics**: Visual progress bars showing positive, negative, and neutral sentiment distribution
+- **Sentiment Filtering**: Filter posts by sentiment type (all, positive, negative, neutral)
+- **Pause/Resume Functionality**: Automatically pauses when scrolling down to read posts
+- **Architecture Overview**: Interactive dialog showing the complete sentiment analysis pipeline
 - **Beautiful UI**: Clean, modern interface built with Base UI components and Tailwind CSS
-- **Dark Mode Support**: Automatic dark mode based on system preferences
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Connection Status**: Real-time connection status indicator with automatic reconnection
+- **Project Information**: Footer with disclaimer and attribution
 
 ## Architecture
 
@@ -22,17 +26,19 @@ This application connects to a NATS JetStream to consume sentiment-analyzed post
 
 ## Tech Stack
 
-- **Next.js 15** - React framework with App Router
-- **Base UI** - Unstyled, accessible React components
+- **Next.js 15** - React framework with App Router and Turbopack
+- **Base UI** - Unstyled, accessible React components (v1.0.0-beta.4)
 - **Tailwind CSS v4** - Utility-first CSS framework
+- **Lucide React** - Beautiful & consistent icon toolkit
 - **nats** - NATS client for Node.js backend
 - **TypeScript** - Type-safe JavaScript
+- **Biome** - Code formatting and linting
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20+ (or use the version specified in `.node-version`)
+- Node.js 20+
 - pnpm package manager
 - NATS server with JetStream enabled (local or remote)
 
@@ -63,7 +69,7 @@ OUTPUT_SUBJECT=bluesky.posts.sentiment
 
 ### Development
 
-Run the development server:
+Run the development server with Turbopack:
 
 ```bash
 pnpm dev
@@ -76,7 +82,7 @@ The API route will connect to NATS and stream posts to the frontend using Server
 ### Building for Production
 
 ```bash
-pnpm build
+pnpm build --turbopack
 pnpm start
 ```
 
@@ -89,44 +95,78 @@ bsky-sentiment-web/
 │   │   ├── api/
 │   │   │   └── stream/
 │   │   │       └── route.ts       # SSE endpoint for NATS streaming
+│   │   ├── favicon.ico            # Site favicon
 │   │   ├── globals.css            # Global styles and Tailwind
-│   │   ├── layout.tsx             # Root layout
-│   │   └── page.tsx               # Home page
+│   │   ├── layout.tsx             # Root layout with Header
+│   │   └── page.tsx               # Home page with tabs and Footer component
 │   ├── components/
+│   │   ├── Footer.tsx             # Footer component with disclaimer
+│   │   ├── Header.tsx             # Header with architecture dialog
 │   │   ├── PostCard.tsx           # Individual post card component
-│   │   ├── PostStream.tsx         # Post stream container
+│   │   ├── PostStream.tsx         # Post stream container with filtering
 │   │   └── SentimentProgress.tsx  # Sentiment progress bars
 │   └── types/
 │       └── post.ts                # TypeScript types
-├── .env.local                     # Environment variables (local)
 ├── .env.example                   # Environment variables (example)
+├── biome.json                     # Biome configuration for linting/formatting
 ├── next.config.ts                 # Next.js configuration
 ├── package.json                   # Dependencies
-└── tailwind.config.ts             # Tailwind configuration
+├── postcss.config.mjs             # PostCSS configuration
+├── public/                        # Static assets
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+└── tsconfig.json                  # TypeScript configuration
 ```
 
 ## Components
 
+### Header
+
+Top navigation bar with:
+- Brand logo and title
+- Architecture overview dialog with detailed pipeline visualization
+- Service descriptions for the entire sentiment analysis pipeline
+- Responsive design with gradient accents
+
+### Footer
+
+Bottom section with:
+- Disclaimer about sentiment analysis accuracy
+- Project information and author attribution
+- Link to GitHub repository
+- Responsive layout
+
 ### PostStream
 
-Connects to the `/api/stream` endpoint and manages the live feed of posts. Handles reconnection logic and maintains a rolling window of the last 50 posts.
+Connects to the `/api/stream` endpoint and manages the live feed of posts. Features include:
+- Real-time connection status indicator
+- Pause/resume functionality when scrolling
+- Automatic reconnection on connection loss
+- Sentiment filtering (all, positive, negative, neutral)
+- Maintains a rolling window of the last 25 posts for display
+- Pending post counter when paused
 
 ### PostCard
 
 Displays individual posts with:
-- Author information
+- Author information (shortened DID)
 - Post text
 - Sentiment badge (positive/negative/neutral)
-- Confidence score
-- Detailed probability breakdown
+- Confidence score and probability breakdown
+- Interactive UI elements (reply, repost, like, share buttons)
+- Sorted sentiment probability pills
 
 ### SentimentProgress
 
-Shows real-time analytics using Base UI Progress components:
-- Positive sentiment (green)
-- Negative sentiment (red)
-- Neutral sentiment (blue)
+Shows real-time analytics using Base UI components:
+- Positive, negative, and neutral sentiment distribution
+- Progress bars with percentages
 - Total posts analyzed
+- Most common sentiment indicator
+- Tooltip with additional information
 
 ## Environment Variables
 
@@ -169,20 +209,16 @@ Server-Sent Events (SSE) endpoint that streams posts from NATS using the Node.js
 
 **Response**: Text/event-stream with JSON-encoded posts
 
+**Query Parameters**:
+- `sentiment` (optional): Filter by sentiment type ("positive", "negative", "neutral")
+
 **Example message**:
 ```json
 {
   "uri": "at://did:plc:abc123/app.bsky.feed.post/xyz789",
   "cid": "bafyrei...",
-  "author": {
-    "did": "did:plc:abc123",
-    "handle": "user.bsky.social",
-    "displayName": "User Name"
-  },
-  "record": {
-    "text": "This is a great post!",
-    "createdAt": "2025-01-01T12:00:00.000Z"
-  },
+  "author": "did:plc:abc123",
+  "text": "This is a great post!",
   "sentiment": {
     "sentiment": "positive",
     "confidence": 0.95,
@@ -191,8 +227,25 @@ Server-Sent Events (SSE) endpoint that streams posts from NATS using the Node.js
       "negative": 0.02,
       "neutral": 0.03
     }
-  }
+  },
+  "processed_at": 1704067200000,
+  "processor": "nats-stream-processor"
 }
+```
+
+## Code Quality
+
+This project uses Biome for code formatting and linting:
+
+```bash
+# Check code quality
+pnpm lint
+
+# Format code
+pnpm format
+
+# Type checking
+npx tsc --noEmit
 ```
 
 ## Troubleshooting
@@ -214,20 +267,6 @@ If connected but no posts show up:
 2. Check that posts are being published to the output stream
 3. Verify stream and subject names match between processor and web app
 4. Check NATS server logs for any errors
-
-### TypeScript Errors
-
-Run type checking:
-
-```bash
-pnpm tsc --noEmit
-```
-
-### Linting
-
-```bash
-pnpm lint
-```
 
 ## Related Services
 
