@@ -6,13 +6,14 @@ A real-time sentiment analysis dashboard for Bluesky posts, built with Next.js, 
 
 - **Real-time Post Stream**: Watch Bluesky posts flow in as they're analyzed
 - **Live Sentiment Analytics**: Visual progress bars showing positive, negative, and neutral sentiment distribution
-- **Sentiment Filtering**: Filter posts by sentiment type (all, positive, negative, neutral)
+- **Tab-based Sentiment Filtering**: Filter posts by sentiment type using intuitive tabs (all, positive, negative, neutral)
 - **Pause/Resume Functionality**: Automatically pauses when scrolling down to read posts
-- **Architecture Overview**: Interactive dialog showing the complete sentiment analysis pipeline
+- **Architecture Overview**: Interactive dialog showing the complete sentiment analysis pipeline with detailed service descriptions
 - **Beautiful UI**: Clean, modern interface built with Base UI components and Tailwind CSS
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Connection Status**: Real-time connection status indicator with automatic reconnection
 - **Project Information**: Footer with disclaimer and attribution
+- **Kubernetes Ready**: Includes Helm charts for easy deployment to Kubernetes clusters
 
 ## Architecture
 
@@ -33,6 +34,8 @@ This application connects to a NATS JetStream to consume sentiment-analyzed post
 - **nats** - NATS client for Node.js backend
 - **TypeScript** - Type-safe JavaScript
 - **Biome** - Code formatting and linting
+- **Helm** - Kubernetes package manager for deployment
+- **Docker** - Containerization for consistent deployments
 
 ## Getting Started
 
@@ -87,6 +90,23 @@ pnpm start
 ```
 
 ## Project Structure
+### Kubernetes Deployment with Helm
+
+The application includes Helm charts for deployment to Kubernetes clusters:
+
+```bash
+# Create secrets from environment file
+cd charts
+./create-secrets.sh --namespace default
+
+# Install the chart
+helm install bsky-sentiment-web ./bsky-sentiment-web --namespace default
+
+# Upgrade the chart
+helm upgrade bsky-sentiment-web ./bsky-sentiment-web --namespace default
+```
+
+For detailed Helm configuration and troubleshooting, see [charts/README.md](./charts/README.md).
 
 ```
 bsky-sentiment-web/
@@ -100,17 +120,25 @@ bsky-sentiment-web/
 │   │   ├── layout.tsx             # Root layout with Header
 │   │   └── page.tsx               # Home page with tabs and Footer component
 │   ├── components/
+│   │   ├── ArchitectureModal.tsx  # Architecture overview dialog
 │   │   ├── Footer.tsx             # Footer component with disclaimer
-│   │   ├── Header.tsx             # Header with architecture dialog
+│   │   ├── Header.tsx             # Header with architecture dialog trigger
 │   │   ├── PostCard.tsx           # Individual post card component
 │   │   ├── PostStream.tsx         # Post stream container with filtering
+│   │   ├── PostStreamTabs.tsx     # Tab navigation for sentiment filtering
 │   │   └── SentimentProgress.tsx  # Sentiment progress bars
 │   └── types/
 │       └── post.ts                # TypeScript types
+├── charts/                        # Helm chart for Kubernetes deployment
+│   ├── bsky-sentiment-web/        # Helm chart templates and values
+│   └── create-secrets.sh          # Script to create Kubernetes secrets
 ├── .env.example                   # Environment variables (example)
+├── .gitignore                     # Git ignore file
 ├── biome.json                     # Biome configuration for linting/formatting
+├── Dockerfile                     # Docker configuration for containerization
 ├── next.config.ts                 # Next.js configuration
 ├── package.json                   # Dependencies
+├── pnpm-lock.yaml                 # Lock file for pnpm
 ├── postcss.config.mjs             # PostCSS configuration
 ├── public/                        # Static assets
 │   ├── file.svg
@@ -127,9 +155,17 @@ bsky-sentiment-web/
 
 Top navigation bar with:
 - Brand logo and title
-- Architecture overview dialog with detailed pipeline visualization
-- Service descriptions for the entire sentiment analysis pipeline
+- Architecture overview dialog trigger with detailed pipeline visualization
 - Responsive design with gradient accents
+
+### ArchitectureModal
+
+Interactive dialog that displays:
+- Complete system architecture overview
+- Service descriptions for the entire sentiment analysis pipeline
+- Visual flow diagram showing data flow from Bluesky to Dashboard
+- Detailed descriptions of each microservice in the pipeline
+- Responsive design for mobile and desktop
 
 ### Footer
 
@@ -139,15 +175,23 @@ Bottom section with:
 - Link to GitHub repository
 - Responsive layout
 
+### PostStreamTabs
+
+Tab navigation component that:
+- Provides sentiment filtering options (all, positive, negative, neutral)
+- Uses Base UI Tabs component for accessibility
+- Displays icons for each sentiment type
+- Responsive design with text labels on larger screens
+
 ### PostStream
 
 Connects to the `/api/stream` endpoint and manages the live feed of posts. Features include:
 - Real-time connection status indicator
 - Pause/resume functionality when scrolling
 - Automatic reconnection on connection loss
-- Sentiment filtering (all, positive, negative, neutral)
 - Maintains a rolling window of the last 25 posts for display
 - Pending post counter when paused
+- Duplicate post tracking
 
 ### PostCard
 
@@ -273,6 +317,7 @@ If connected but no posts show up:
 - **nats-firehose-ingest**: Ingests posts from Bluesky firehose
 - **nats-stream-processor**: Performs sentiment analysis on posts
 - **gke-cluster**: Kubernetes cluster configuration
+- **charts/**: Helm charts for Kubernetes deployment (see [charts/README.md](./charts/README.md))
 
 ## License
 

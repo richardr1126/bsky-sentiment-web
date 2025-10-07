@@ -1,5 +1,3 @@
-"use client";
-
 import type { Post } from "@/types/post";
 
 type Sentiment = "positive" | "negative" | "neutral" | "unknown";

@@ -5,7 +5,7 @@ import { Switch } from "@base-ui-components/react/switch";
 import { Toolbar } from "@base-ui-components/react/toolbar";
 import { Tooltip } from "@base-ui-components/react/tooltip";
 import { ArrowUp } from "lucide-react";
-import * as React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Post } from "@/types/post";
 import { PostCard } from "./PostCard";
 
@@ -24,17 +24,17 @@ export function PostStream({
   sentimentFilter,
   duplicateCount,
 }: PostStreamProps) {
-  const [isConnected, setIsConnected] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const [pendingPostCount, setPendingPostCount] = React.useState(0);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [pendingPostCount, setPendingPostCount] = useState(0);
 
-  const viewportRef = React.useRef<HTMLDivElement | null>(null);
-  const pendingPostsRef = React.useRef<Post[]>([]);
-  const isResuming = React.useRef(false);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const pendingPostsRef = useRef<Post[]>([]);
+  const isResuming = useRef(false);
 
   // Pause when user scrolls down; resume when scrolled back to top.
-  const handleScroll = React.useCallback(() => {
+  const handleScroll = useCallback(() => {
     const el = viewportRef.current;
     if (!el) return;
     const { scrollTop } = el;
@@ -43,7 +43,7 @@ export function PostStream({
     }
   }, [isPaused]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
     el.addEventListener("scroll", handleScroll);
@@ -51,7 +51,7 @@ export function PostStream({
   }, [handleScroll]);
 
   // Handle incoming posts - queue while paused
-  const handleIncomingPost = React.useCallback(
+  const handleIncomingPost = useCallback(
     (post: Post) => {
       if (isPaused) {
         pendingPostsRef.current.push(post);
@@ -64,7 +64,7 @@ export function PostStream({
   );
 
   // Resume stream and flush queued posts
-  const handleResume = React.useCallback(() => {
+  const handleResume = useCallback(() => {
     isResuming.current = true;
 
     if (pendingPostsRef.current.length) {
@@ -86,7 +86,7 @@ export function PostStream({
   }, [onPostReceived]);
 
   // EventSource connection lifecycle
-  React.useEffect(() => {
+  useEffect(() => {
     let eventSource: EventSource | null = null;
 
     const connectToStream = () => {

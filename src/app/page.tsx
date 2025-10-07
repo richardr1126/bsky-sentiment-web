@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Footer } from "@/components/Footer";
 import { PostStreamTabs } from "@/components/PostStreamTabs";
 import { SentimentProgress } from "@/components/SentimentProgress";
 import type { Post, SentimentStats } from "@/types/post";
@@ -85,7 +84,7 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen flex flex-col bg-background">
+    <main className="flex flex-col bg-background">
       {/* Main content */}
       <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -114,8 +113,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <Footer />
     </main>
   );
 }

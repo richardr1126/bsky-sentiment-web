@@ -1,10 +1,6 @@
-"use client";
-
 import { AlertCircle, BookOpen, Github } from "lucide-react";
 
 export function Footer() {
-  const _year = new Date().getFullYear();
-
   return (
     <footer className="relative mt-auto border-t border-border/60 bg-gradient-to-b from-surface/60 to-surface-secondary/80 backdrop-blur supports-[backdrop-filter]:bg-surface/40">
       {/* Accent gradient bar */}

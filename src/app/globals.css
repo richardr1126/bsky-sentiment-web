@@ -2,22 +2,22 @@
 
 :root {
   /* Base colors */
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa;
+  --foreground: #0a0a0a;
 
   /* Surface colors */
   --surface: #ffffff;
-  --surface-secondary: #f9fafb;
-  --surface-tertiary: #f3f4f6;
+  --surface-secondary: #f5f5f5;
+  --surface-tertiary: #efefef;
 
   /* Border colors */
-  --border: #e5e7eb;
-  --border-secondary: #d1d5db;
+  --border: #d4d4d4;
+  --border-secondary: #a3a3a3;
 
   /* Text colors */
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  --text-primary: #0a0a0a;
+  --text-secondary: #525252;
+  --text-tertiary: #737373;
 
   /* Sentiment colors - Positive */
   --sentiment-positive-bg: #dcfce7;
@@ -57,47 +57,47 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Base colors - Deep blacks and dark grays */
-    --background: #121212;
+    /* Base colors - Balanced dark grays */
+    --background: #0f0f0f;
     --foreground: #e5e5e5;
 
-    /* Surface colors - True blacks to dark grays */
-    --surface: #0a0a0a;
-    --surface-secondary: #000000;
-    --surface-tertiary: #1a1a1a;
+    /* Surface colors - Layered dark grays for depth */
+    --surface: #1a1a1a;
+    --surface-secondary: #141414;
+    --surface-tertiary: #202020;
 
-    /* Border colors - Subtle dark grays */
-    --border: #262626;
-    --border-secondary: #333333;
+    /* Border colors - Visible but subtle */
+    --border: #3a3a3a;
+    --border-secondary: #4a4a4a;
 
-    /* Text colors - High contrast whites to grays */
-    --text-primary: #ffffff;
-    --text-secondary: #a3a3a3;
-    --text-tertiary: #737373;
+    /* Text colors - Good contrast */
+    --text-primary: #f5f5f5;
+    --text-secondary: #b4b4b4;
+    --text-tertiary: #8a8a8a;
 
-    /* Sentiment colors - Positive (green) */
-    --sentiment-positive-bg: #052e16;
+    /* Sentiment colors - Positive (green) - Better visibility */
+    --sentiment-positive-bg: #0a3a1a;
     --sentiment-positive-text: #86efac;
-    --sentiment-positive-border: #14532d;
+    --sentiment-positive-border: #1a5a2e;
     --sentiment-positive-accent: #22c55e;
 
-    /* Sentiment colors - Negative (red) */
-    --sentiment-negative-bg: #450a0a;
+    /* Sentiment colors - Negative (red) - Better visibility */
+    --sentiment-negative-bg: #3a0a0a;
     --sentiment-negative-text: #fca5a5;
-    --sentiment-negative-border: #7f1d1d;
+    --sentiment-negative-border: #5a1a1a;
     --sentiment-negative-accent: #ef4444;
 
-    /* Sentiment colors - Neutral (blue - strategic use) */
-    --sentiment-neutral-bg: #0a1628;
+    /* Sentiment colors - Neutral (blue) - Better visibility */
+    --sentiment-neutral-bg: #0a1a3a;
     --sentiment-neutral-text: #93c5fd;
-    --sentiment-neutral-border: #1e3a8a;
+    --sentiment-neutral-border: #1a2a5a;
     --sentiment-neutral-accent: #3b82f6;
 
-    /* Brand colors - Blue accent (strategic use only) */
-    --brand-primary: #3b82f6;
-    --brand-primary-hover: #60a5fa;
-    --brand-gradient-from: #4338ca;
-    --brand-gradient-to: #7c3aed;
+    /* Brand colors - Consistent with light mode */
+    --brand-primary: #4f46e5;
+    --brand-primary-hover: #6366f1;
+    --brand-gradient-from: #6366f1;
+    --brand-gradient-to: #9333ea;
 
     /* Status colors */
     --status-success: #22c55e;
@@ -166,15 +166,15 @@
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
 
-  /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Fonts - Configure for Tailwind v4 */
+  --font-family-sans: var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
+  --font-family-mono: var(--font-jetbrains-mono), ui-monospace, 'Courier New', monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
   position: relative;
 }
 
