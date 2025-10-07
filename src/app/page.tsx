@@ -1,11 +1,9 @@
 "use client";
 
-import { Tabs } from "@base-ui-components/react/tabs";
-import { Frown, Layers, Meh, Smile } from "lucide-react";
 import * as React from "react";
 import { Footer } from "@/components/Footer";
-import { PostStream } from "@/components/PostStream";
 import { SentimentProgress } from "@/components/SentimentProgress";
+import { PostStreamTabs } from "@/components/PostStreamTabs";
 import type { Post, SentimentStats } from "@/types/post";
 
 const MAX_DISPLAY_POSTS = 25; // Limit visible posts for better performance
@@ -90,64 +88,12 @@ export default function Home() {
 
           {/* Post stream - takes up 2 columns on large screens */}
           <div className="lg:col-span-2">
-            <Tabs.Root value={activeSentiment} onValueChange={handleTabChange}>
-              {/* Tab List */}
-              <Tabs.List className="flex gap-2 mb-4 p-1 rounded-lg border border-border bg-surface">
-                <Tabs.Tab
-                  value="all"
-                  className={`flex-1 px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors data-[selected]:shadow-sm flex items-center justify-center gap-2 ${
-                    activeSentiment === "all"
-                      ? "bg-brand-primary text-white"
-                      : "bg-transparent text-text-secondary hover:bg-surface-secondary"
-                  }`}
-                >
-                  <Layers className="h-4 w-4" />
-                  <span className="hidden sm:inline">All Posts</span>
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="positive"
-                  className={`flex-1 px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors data-[selected]:shadow-sm flex items-center justify-center gap-2 ${
-                    activeSentiment === "positive"
-                      ? "bg-sentiment-positive-accent text-white"
-                      : "bg-transparent text-text-secondary hover:bg-surface-secondary"
-                  }`}
-                >
-                  <Smile className="h-4 w-4" />
-                  <span className="hidden sm:inline">Positive</span>
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="negative"
-                  className={`flex-1 px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors data-[selected]:shadow-sm flex items-center justify-center gap-2 ${
-                    activeSentiment === "negative"
-                      ? "bg-sentiment-negative-accent text-white"
-                      : "bg-transparent text-text-secondary hover:bg-surface-secondary"
-                  }`}
-                >
-                  <Frown className="h-4 w-4" />
-                  <span className="hidden sm:inline">Negative</span>
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="neutral"
-                  className={`flex-1 px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors data-[selected]:shadow-sm flex items-center justify-center gap-2 ${
-                    activeSentiment === "neutral"
-                      ? "bg-sentiment-neutral-accent text-white"
-                      : "bg-transparent text-text-secondary hover:bg-surface-secondary"
-                  }`}
-                >
-                  <Meh className="h-4 w-4" />
-                  <span className="hidden sm:inline">Neutral</span>
-                </Tabs.Tab>
-              </Tabs.List>
-
-              {/* Tab Panels - Single panel for all tabs since PostStream handles the filtering */}
-              <Tabs.Panel value={activeSentiment}>
-                <PostStream
-                  posts={displayPosts}
-                  onPostReceived={handlePostReceived}
-                  sentimentFilter={activeSentiment}
-                />
-              </Tabs.Panel>
-            </Tabs.Root>
+            <PostStreamTabs
+              activeSentiment={activeSentiment}
+              onTabChange={handleTabChange}
+              displayPosts={displayPosts}
+              onPostReceived={handlePostReceived}
+            />
           </div>
         </div>
       </div>
