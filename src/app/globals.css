@@ -167,8 +167,10 @@
   --shadow-lg: var(--shadow-lg);
 
   /* Fonts - Configure for Tailwind v4 */
-  --font-family-sans: var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
-  --font-family-mono: var(--font-jetbrains-mono), ui-monospace, 'Courier New', monospace;
+  --font-family-sans:
+    var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
+  --font-family-mono:
+    var(--font-jetbrains-mono), ui-monospace, "Courier New", monospace;
 }
 
 body {
