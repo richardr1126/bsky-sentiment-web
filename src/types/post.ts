@@ -13,6 +13,7 @@ export interface Post {
   cid: string;
   author: string; // DID of the author
   text: string;
+  created_at: string; // ISO 8601 timestamp
   sentiment?: SentimentData;
   processed_at?: number;
   processor?: string;

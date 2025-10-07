@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { Post } from "@/types/post";
 
 type Sentiment = "positive" | "negative" | "neutral" | "unknown";
@@ -50,6 +51,25 @@ export function PostCard({ post }: { post: Post }) {
   const _confidence = post.sentiment?.confidence ?? 0;
   const probs = post.sentiment?.probabilities;
   const authorShort = post.author ? post.author.slice(-8) : "unknown";
+
+  // Format the timestamp with useMemo to avoid recalculating on every render
+  const timeAgo = useMemo(() => {
+    if (!post.created_at) return "now";
+
+    const now = new Date();
+    const created = new Date(post.created_at);
+    const diffMs = now.getTime() - created.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffSecs < 10) return "now";
+    if (diffSecs < 60) return `${diffSecs}s`;
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    return `${diffDays}d`;
+  }, [post.created_at]);
 
   const positivePct = probs ? Math.round(probs.positive * 100) : 0;
   const neutralPct = probs ? Math.round(probs.neutral * 100) : 0;
@@ -105,7 +125,7 @@ export function PostCard({ post }: { post: Post }) {
               <div className="flex items-center gap-1.5 text-text-tertiary text-sm">
                 <span>@{authorShort}</span>
                 <span>·</span>
-                <span>now</span>
+                <span>{timeAgo}</span>
               </div>
             </div>
 
