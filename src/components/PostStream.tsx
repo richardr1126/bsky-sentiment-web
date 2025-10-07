@@ -15,12 +15,14 @@ interface PostStreamProps {
   posts: Post[];
   onPostReceived: (post: Post) => void;
   sentimentFilter: SentimentFilter;
+  duplicateCount: number;
 }
 
 export function PostStream({
   posts,
   onPostReceived,
   sentimentFilter,
+  duplicateCount,
 }: PostStreamProps) {
   const [isConnected, setIsConnected] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -238,7 +240,20 @@ export function PostStream({
 
       {/* Footer count */}
       <div className="border-t border-border px-4 py-3 text-center text-xs text-text-secondary">
-        Showing {posts.length} recent post{posts.length !== 1 ? "s" : ""}
+        <div className="flex items-center justify-center gap-4">
+          <span>
+            Showing {posts.length} recent post{posts.length !== 1 ? "s" : ""}
+          </span>
+          {duplicateCount > 0 && (
+            <>
+              <span>·</span>
+              <span className="text-status-warning">
+                {duplicateCount} duplicate{duplicateCount !== 1 ? "s" : ""}{" "}
+                filtered
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

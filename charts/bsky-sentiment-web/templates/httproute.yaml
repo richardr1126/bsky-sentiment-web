@@ -1,0 +1,28 @@
+{{- if .Values.httproute.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "bsky-sentiment-web.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.httproute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "bsky-sentiment-web.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ .Values.httproute.parentRef.name }}
+    namespace: {{ .Values.httproute.parentRef.namespace }}
+    sectionName: {{ .Values.httproute.parentRef.sectionName }}
+  hostnames:
+  - {{ .Values.httproute.hostname | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ include "bsky-sentiment-web.fullname" . }}
+      port: {{ .Values.service.port }}
+{{- end }}

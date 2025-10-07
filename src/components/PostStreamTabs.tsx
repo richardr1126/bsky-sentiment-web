@@ -10,6 +10,7 @@ interface PostStreamTabsProps {
   onTabChange: (value: string) => void;
   displayPosts: Post[];
   onPostReceived: (post: Post) => void;
+  duplicateCount: number;
 }
 
 export function PostStreamTabs({
@@ -17,6 +18,7 @@ export function PostStreamTabs({
   onTabChange,
   displayPosts,
   onPostReceived,
+  duplicateCount,
 }: PostStreamTabsProps) {
   return (
     <Tabs.Root value={activeSentiment} onValueChange={onTabChange}>
@@ -74,6 +76,7 @@ export function PostStreamTabs({
           posts={displayPosts}
           onPostReceived={onPostReceived}
           sentimentFilter={activeSentiment}
+          duplicateCount={duplicateCount}
         />
       </Tabs.Panel>
     </Tabs.Root>

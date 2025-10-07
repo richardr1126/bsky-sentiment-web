@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { useCallback, useRef, useState } from "react";
 import { Footer } from "@/components/Footer";
-import { SentimentProgress } from "@/components/SentimentProgress";
 import { PostStreamTabs } from "@/components/PostStreamTabs";
+import { SentimentProgress } from "@/components/SentimentProgress";
 import type { Post, SentimentStats } from "@/types/post";
 
 const MAX_DISPLAY_POSTS = 25; // Limit visible posts for better performance
@@ -12,19 +12,23 @@ const MAX_STATS_POSTS = 1000; // Keep more posts for accurate sentiment analysis
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 
 export default function Home() {
-  const [displayPosts, setDisplayPosts] = React.useState<Post[]>([]);
-  const [_allPosts, setAllPosts] = React.useState<Post[]>([]);
+  const [displayPosts, setDisplayPosts] = useState<Post[]>([]);
+  const [_allPosts, setAllPosts] = useState<Post[]>([]);
   const [activeSentiment, setActiveSentiment] =
-    React.useState<SentimentFilter>("all");
-  const [stats, setStats] = React.useState<SentimentStats>({
+    useState<SentimentFilter>("all");
+  const [stats, setStats] = useState<SentimentStats>({
     positive: 0,
     negative: 0,
     neutral: 0,
     total: 0,
   });
+  const [duplicateCount, setDuplicateCount] = useState(0);
+
+  // Track seen post URIs to prevent duplicates
+  const seenUrisRef = useRef<Set<string>>(new Set());
 
   // Reset stats when switching tabs
-  const handleTabChange = React.useCallback((value: string) => {
+  const handleTabChange = useCallback((value: string) => {
     setActiveSentiment(value as SentimentFilter);
     // Clear stats when switching tabs
     setStats({
@@ -36,10 +40,22 @@ export default function Home() {
     // Clear all posts to start fresh
     setAllPosts([]);
     setDisplayPosts([]);
+    // Reset duplicate tracking
+    seenUrisRef.current.clear();
+    setDuplicateCount(0);
   }, []);
 
-  const handlePostReceived = React.useCallback(
+  const handlePostReceived = useCallback(
     (post: Post) => {
+      // Check for duplicate post
+      if (seenUrisRef.current.has(post.uri)) {
+        setDuplicateCount((prev) => prev + 1);
+        return; // Skip duplicate posts
+      }
+
+      // Add to seen set
+      seenUrisRef.current.add(post.uri);
+
       setAllPosts((prevPosts) => {
         const newAllPosts = [post, ...prevPosts].slice(0, MAX_STATS_POSTS);
 
@@ -93,6 +109,7 @@ export default function Home() {
               onTabChange={handleTabChange}
               displayPosts={displayPosts}
               onPostReceived={handlePostReceived}
+              duplicateCount={duplicateCount}
             />
           </div>
         </div>
