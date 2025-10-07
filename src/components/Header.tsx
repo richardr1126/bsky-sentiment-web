@@ -193,7 +193,8 @@ export function Header() {
                       <h4 className="text-xs font-semibold uppercase tracking-wide text-text-tertiary mb-4">
                         Sentiment Analysis Pipeline
                       </h4>
-                      <div className="flex items-center justify-between gap-2 text-xs">
+                      {/* Desktop: single row, Mobile: two rows */}
+                      <div className="hidden lg:flex items-center justify-between gap-2 text-xs">
                         {/* Bluesky Firehose */}
                         <div className="flex flex-col items-center flex-1">
                           <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 flex items-center justify-center mb-2">
@@ -303,7 +304,7 @@ export function Header() {
                           </span>
                         </div>
 
-                        {/* Arrow back to NATS */}
+                        {/* Arrow */}
                         <div className="flex flex-col items-center px-1">
                           <svg
                             className="w-5 h-4 text-brand-primary/60"
@@ -365,6 +366,169 @@ export function Header() {
                           <span className="text-text-tertiary text-[9px]">
                             Real-time
                           </span>
+                        </div>
+                      </div>
+
+                      {/* Mobile/Tablet: two rows */}
+                      <div className="lg:hidden space-y-3">
+                        {/* Row 1: Bluesky -> Ingest -> NATS (Raw) */}
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          {/* Bluesky Firehose */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 flex items-center justify-center mb-2">
+                              <Cloud className="h-5 w-5 text-blue-400" />
+                            </div>
+                            <span className="font-medium text-text-primary text-center text-[11px]">
+                              Bluesky
+                            </span>
+                            <span className="text-text-tertiary text-[9px]">
+                              Firehose
+                            </span>
+                          </div>
+
+                          {/* Arrow */}
+                          <div className="flex flex-col items-center px-1">
+                            <svg
+                              className="w-5 h-4 text-brand-primary/60"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              role="img"
+                              aria-label="Arrow"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* Ingest Service */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 border border-brand-primary/30 flex items-center justify-center mb-2">
+                              <Zap className="h-5 w-5 text-brand-primary" />
+                            </div>
+                            <span className="font-medium text-text-primary text-center text-[11px]">
+                              Ingest
+                            </span>
+                            <span className="text-text-tertiary text-[9px]">
+                              Filter
+                            </span>
+                          </div>
+
+                          {/* Arrow */}
+                          <div className="flex flex-col items-center px-1">
+                            <svg
+                              className="w-5 h-4 text-brand-primary/60"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              role="img"
+                              aria-label="Arrow"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* NATS JetStream */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 flex items-center justify-center mb-2">
+                              <Layers className="h-5 w-5 text-purple-400" />
+                            </div>
+                            <span className="font-medium text-text-primary text-center text-[11px]">
+                              NATS
+                            </span>
+                            <span className="text-text-tertiary text-[9px]">
+                              Raw posts
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Row 2: Processor -> NATS (Enriched) -> Dashboard */}
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          {/* Processor Service */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-sentiment-positive-accent/20 to-sentiment-positive-accent/10 border border-sentiment-positive-accent/30 flex items-center justify-center mb-2">
+                              <ChartBar className="h-5 w-5 text-sentiment-positive-accent" />
+                            </div>
+                            <span className="font-medium text-text-primary text-center text-[11px]">
+                              Processor
+                            </span>
+                            <span className="text-text-tertiary text-[9px]">
+                              ONNX Model
+                            </span>
+                          </div>
+
+                          {/* Arrow */}
+                          <div className="flex flex-col items-center px-1">
+                            <svg
+                              className="w-5 h-4 text-brand-primary/60"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              role="img"
+                              aria-label="Arrow"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* NATS JetStream (Output) */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 flex items-center justify-center mb-2">
+                              <Layers className="h-5 w-5 text-purple-400" />
+                            </div>
+                            <span className="font-medium text-text-primary text-center text-[11px]">
+                              NATS
+                            </span>
+                            <span className="text-text-tertiary text-[9px]">
+                              Posts w/ Sentiment
+                            </span>
+                          </div>
+
+                          {/* Arrow */}
+                          <div className="flex flex-col items-center px-1">
+                            <svg
+                              className="w-5 h-4 text-brand-primary/60"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              role="img"
+                              aria-label="Arrow"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* Dashboard */}
+                          <div className="flex flex-col items-center flex-1">
+                            <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 border border-brand-primary/30 flex items-center justify-center mb-2">
+                              <Activity className="h-5 w-5 text-brand-primary" />
+                            </div>
+                            <span className="font-medium text-text-primary text-center text-[11px]">
+                              Dashboard
+                            </span>
+                            <span className="text-text-tertiary text-[9px]">
+                              Real-time
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div className="mt-4 pt-3 border-t border-border/30">
