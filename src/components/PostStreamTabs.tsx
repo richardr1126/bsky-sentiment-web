@@ -1,6 +1,8 @@
 import { Tabs } from "@base-ui-components/react/tabs";
 import { Frown, Layers, Meh, Smile } from "lucide-react";
-import type { Post } from "@/types/post";
+import { useCallback, useMemo } from "react";
+import { getTopicColor } from "@/lib/topicColors";
+import type { Post, TopicStats } from "@/types/post";
 import { PostStream } from "./PostStream";
 
 type SentimentFilter = "all" | "positive" | "negative" | "neutral";
@@ -11,6 +13,9 @@ interface PostStreamTabsProps {
   displayPosts: Post[];
   onPostReceived: (post: Post) => void;
   duplicateCount: number;
+  topicStats: TopicStats;
+  selectedTopic: string;
+  onTopicChange: (topic: string) => void;
 }
 
 export function PostStreamTabs({
@@ -19,10 +24,28 @@ export function PostStreamTabs({
   displayPosts,
   onPostReceived,
   duplicateCount,
+  topicStats,
+  selectedTopic,
+  onTopicChange,
 }: PostStreamTabsProps) {
+  // Extract available topics from topicStats, sorted by count (same as TopicDistribution)
+  const availableTopics = useMemo(() => {
+    return Object.entries(topicStats)
+      .filter(([key]) => key !== "total")
+      .sort((a, b) => b[1] - a[1]) // Sort by count descending
+      .map(([topic]) => topic);
+  }, [topicStats]);
+
+  const handleTopicChange = useCallback(
+    (topic: string) => {
+      onTopicChange(topic);
+    },
+    [onTopicChange],
+  );
+
   return (
     <Tabs.Root value={activeSentiment} onValueChange={onTabChange}>
-      {/* Tab List */}
+      {/* Sentiment Tab List */}
       <Tabs.List className="flex gap-2 mb-4 p-1 rounded-lg border border-border bg-surface">
         <Tabs.Tab
           value="all"
@@ -33,7 +56,7 @@ export function PostStreamTabs({
           }`}
         >
           <Layers className="h-4 w-4" />
-          <span className="hidden sm:inline">All Posts</span>
+          <span className="hidden sm:inline">All Sentiments</span>
         </Tabs.Tab>
         <Tabs.Tab
           value="positive"
@@ -70,12 +93,55 @@ export function PostStreamTabs({
         </Tabs.Tab>
       </Tabs.List>
 
+      {/* Topic Filter */}
+      {availableTopics.length > 0 && (
+        <div className="mb-4 p-3 rounded-lg border border-border bg-surface">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handleTopicChange("all")}
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${
+                selectedTopic === "all"
+                  ? "bg-brand-primary text-white border-brand-primary"
+                  : "bg-surface-secondary text-text-secondary hover:bg-surface-tertiary border-border"
+              }`}
+            >
+              All Topics
+            </button>
+            {availableTopics.map((topic) => {
+              const colorScheme = getTopicColor(topic, availableTopics);
+              const isSelected = selectedTopic === topic;
+              return (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => handleTopicChange(topic)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-colors ${
+                    isSelected
+                      ? "bg-brand-primary text-white border-brand-primary"
+                      : "bg-surface-secondary text-text-secondary hover:bg-surface-tertiary border-border"
+                  }`}
+                >
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${colorScheme.dot}`}
+                  />
+                  <span className="text-xs font-medium capitalize">
+                    {topic.replace(/_/g, " ").replace(/&/g, "and")}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Tab Panels - Single panel for all tabs since PostStream handles the filtering */}
       <Tabs.Panel value={activeSentiment}>
         <PostStream
           posts={displayPosts}
           onPostReceived={onPostReceived}
           sentimentFilter={activeSentiment}
+          topicFilter={selectedTopic}
           duplicateCount={duplicateCount}
         />
       </Tabs.Panel>

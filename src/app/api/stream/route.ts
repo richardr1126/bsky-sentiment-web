@@ -13,17 +13,18 @@ export const dynamic = "force-dynamic";
 
 // NATS connection configuration
 const NATS_URL = process.env.NATS_URL || "nats://localhost:4222";
-const OUTPUT_STREAM = process.env.OUTPUT_STREAM || "bluesky-posts-sentiment";
-const OUTPUT_SUBJECT = process.env.OUTPUT_SUBJECT || "bluesky.posts.sentiment";
+const OUTPUT_STREAM = process.env.OUTPUT_STREAM || "bluesky-posts-enriched-dev";
+const OUTPUT_SUBJECT = process.env.OUTPUT_SUBJECT || "bluesky.enriched";
 
 export async function GET(request: Request) {
-  // Get sentiment filter from URL
+  // Get sentiment and topic filters from URL
   const { searchParams } = new URL(request.url);
   const sentimentFilter = searchParams.get("sentiment") as
     | "positive"
     | "negative"
     | "neutral"
     | null;
+  const topicFilter = searchParams.get("topic");
   const encoder = new TextEncoder();
   const sc = StringCodec();
 
@@ -56,9 +57,21 @@ export async function GET(request: Request) {
         // Create an ordered consumer that starts from new messages only
         // Ordered consumers are ephemeral and automatically cleaned up
         // This ensures each client connection sees only messages arriving after connection
-        const filterSubject = sentimentFilter
-          ? `${OUTPUT_SUBJECT}.${sentimentFilter}`
-          : `${OUTPUT_SUBJECT}.>`;
+        // Build filter subject based on sentiment and topic filters
+        let filterSubject: string;
+        if (sentimentFilter && topicFilter) {
+          // Both filters: bluesky.enriched.{sentiment}.{topic}
+          filterSubject = `${OUTPUT_SUBJECT}.${sentimentFilter}.${topicFilter}`;
+        } else if (sentimentFilter) {
+          // Only sentiment: bluesky.enriched.{sentiment}.>
+          filterSubject = `${OUTPUT_SUBJECT}.${sentimentFilter}.>`;
+        } else if (topicFilter) {
+          // Only topic: bluesky.enriched.*.{topic}
+          filterSubject = `${OUTPUT_SUBJECT}.*.${topicFilter}`;
+        } else {
+          // No filters: bluesky.enriched.>
+          filterSubject = `${OUTPUT_SUBJECT}.>`;
+        }
 
         console.log(
           "Creating ordered consumer for stream:",

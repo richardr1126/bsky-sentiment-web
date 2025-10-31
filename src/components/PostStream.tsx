@@ -15,6 +15,7 @@ interface PostStreamProps {
   posts: Post[];
   onPostReceived: (post: Post) => void;
   sentimentFilter: SentimentFilter;
+  topicFilter?: string;
   duplicateCount: number;
 }
 
@@ -22,6 +23,7 @@ export function PostStream({
   posts,
   onPostReceived,
   sentimentFilter,
+  topicFilter = "all",
   duplicateCount,
 }: PostStreamProps) {
   const [isConnected, setIsConnected] = useState(false);
@@ -91,10 +93,15 @@ export function PostStream({
 
     const connectToStream = () => {
       try {
-        const url =
-          sentimentFilter === "all"
-            ? "/api/stream"
-            : `/api/stream?sentiment=${sentimentFilter}`;
+        // Build URL with sentiment and topic filters
+        const params = new URLSearchParams();
+        if (sentimentFilter !== "all") {
+          params.append("sentiment", sentimentFilter);
+        }
+        if (topicFilter !== "all") {
+          params.append("topic", topicFilter);
+        }
+        const url = `/api/stream${params.toString() ? `?${params.toString()}` : ""}`;
         eventSource = new EventSource(url);
 
         eventSource.onopen = () => {
@@ -130,7 +137,7 @@ export function PostStream({
     return () => {
       if (eventSource) eventSource.close();
     };
-  }, [handleIncomingPost, sentimentFilter]);
+  }, [handleIncomingPost, sentimentFilter, topicFilter]);
 
   return (
     <div className="rounded-xl border border-border bg-surface shadow-md overflow-hidden">

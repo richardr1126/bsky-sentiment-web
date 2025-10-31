@@ -5,9 +5,13 @@ import type { SentimentStats } from "@/types/post";
 
 interface SentimentProgressProps {
   stats: SentimentStats;
+  onSentimentClick?: (sentiment: "positive" | "negative" | "neutral") => void;
 }
 
-export function SentimentProgress({ stats }: SentimentProgressProps) {
+export function SentimentProgress({
+  stats,
+  onSentimentClick,
+}: SentimentProgressProps) {
   const total = Math.max(1, stats.total); // prevent division by zero
   const positivePercent = Math.round((stats.positive / total) * 100);
   const negativePercent = Math.round((stats.negative / total) * 100);
@@ -56,7 +60,7 @@ export function SentimentProgress({ stats }: SentimentProgressProps) {
               Sentiment Analysis
             </h2>
             <p className="mt-0.5 text-xs text-text-secondary">
-              Live stream distribution
+              Sentiment breakdown from live stream
             </p>
           </div>
 
@@ -87,14 +91,24 @@ export function SentimentProgress({ stats }: SentimentProgressProps) {
         {sortedSentiments.map((s) => (
           <div key={s.label} className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${s.border} ${s.bg}`}
+              <button
+                type="button"
+                onClick={() =>
+                  onSentimentClick?.(
+                    s.label.toLowerCase() as
+                      | "positive"
+                      | "negative"
+                      | "neutral",
+                  )
+                }
+                disabled={!onSentimentClick}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${s.border} ${s.bg} ${onSentimentClick ? "cursor-pointer hover:opacity-80 transition-opacity" : "cursor-default"}`}
               >
                 <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
                 <span className="text-xs font-medium text-text-primary">
                   {s.label}
                 </span>
-              </div>
+              </button>
               <div className="flex items-baseline gap-2">
                 <span className={`text-lg font-bold ${s.color}`}>
                   {s.percent}%

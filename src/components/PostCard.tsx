@@ -117,23 +117,64 @@ export function PostCard({ post }: { post: Post }) {
 
         <div className="min-w-0 flex-1">
           {/* Author and sentiment */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 min-w-0">
-              <span className="font-bold text-text-primary text-sm truncate">
-                User {authorShort}
-              </span>
-              <div className="flex items-center gap-1.5 text-text-tertiary text-sm">
-                <span>@{authorShort}</span>
-                <span>·</span>
-                <span>{timeAgo}</span>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+                <span className="font-bold text-text-primary text-sm truncate">
+                  User {authorShort}
+                </span>
+                <div className="flex items-center gap-1.5 text-text-tertiary text-sm">
+                  <span>@{authorShort}</span>
+                  <span>·</span>
+                  <span>{timeAgo}</span>
+                </div>
               </div>
+
+              {/* Topics pills - show if available */}
+              {post.topics &&
+              (post.topics.topics.length > 0 || post.topics.top_topic) ? (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {post.topics.topics.length > 0 ? (
+                    <>
+                      {post.topics.topics.slice(0, 3).map((topic) => (
+                        <div
+                          key={topic}
+                          className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-tertiary border border-border"
+                        >
+                          <span className="text-xs text-text-secondary capitalize">
+                            {topic.replace(/_/g, " ").replace(/&/g, "and")}
+                          </span>
+                        </div>
+                      ))}
+                      {post.topics.topics.length > 3 && (
+                        <span className="text-xs text-text-tertiary">
+                          +{post.topics.topics.length - 3} more
+                        </span>
+                      )}
+                    </>
+                  ) : post.topics.top_topic ? (
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-tertiary border border-border">
+                      <span className="text-xs text-text-secondary capitalize">
+                        {post.topics.top_topic
+                          .replace(/_/g, " ")
+                          .replace(/&/g, "and")}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
 
-            <div
-              className={`flex-shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-full border ${ui.badgeClasses}`}
-            >
-              <div className={`w-1.5 h-1.5 rounded-full ${ui.accentBgClass}`} />
-              <span className="text-xs font-medium">{sentiment}</span>
+            {/* Sentiment badge */}
+            <div className="flex-shrink-0">
+              <div
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full border ${ui.badgeClasses}`}
+              >
+                <div
+                  className={`w-1.5 h-1.5 rounded-full ${ui.accentBgClass}`}
+                />
+                <span className="text-xs font-medium">{sentiment}</span>
+              </div>
             </div>
           </div>
 
