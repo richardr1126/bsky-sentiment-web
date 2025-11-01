@@ -43,32 +43,36 @@ export default function Home() {
     (value: string) => {
       setActiveSentiment(value as SentimentFilter);
 
-      // Only reset all data if no topic filter is active
-      if (selectedTopic === "all") {
+      // Always reset display posts when filter changes
+      // Stats will continue to accumulate from the filtered stream
+      setDisplayPosts([]);
+
+      // Only reset stats when returning to "all" with no topic filter
+      if (value === "all" && selectedTopic === "all") {
         setStats(INITIAL_SENTIMENT_STATS);
         setTopicStats(INITIAL_TOPIC_STATS);
-        setDisplayPosts([]);
         setStatsPosts([]);
       }
     },
     [selectedTopic],
   );
 
-  // Handle topic filter change - only clear when going back to "all"
+  // Handle topic filter change
   const handleTopicChange = useCallback(
     (topic: string) => {
-      const wasFiltered = selectedTopic !== "all";
       setSelectedTopic(topic);
 
-      // Only clear all data when going back to "all" from a filtered state
-      if (topic === "all" && wasFiltered) {
+      // Always reset display posts when filter changes
+      setDisplayPosts([]);
+
+      // Only reset stats when returning to "all" with no sentiment filter
+      if (topic === "all" && activeSentiment === "all") {
         setStats(INITIAL_SENTIMENT_STATS);
         setTopicStats(INITIAL_TOPIC_STATS);
-        setDisplayPosts([]);
         setStatsPosts([]);
       }
     },
-    [selectedTopic],
+    [activeSentiment],
   );
 
   const handlePostReceived = useCallback((post: Post) => {
