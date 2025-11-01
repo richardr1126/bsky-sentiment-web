@@ -1,6 +1,7 @@
 "use client";
 
 import { Tooltip } from "@base-ui-components/react/tooltip";
+import { motion } from "framer-motion";
 import type { SentimentStats } from "@/types/post";
 
 interface SentimentProgressProps {
@@ -89,7 +90,18 @@ export function SentimentProgress({
       {/* Sentiment Pills */}
       <div className="p-4 space-y-3">
         {sortedSentiments.map((s) => (
-          <div key={s.label} className="space-y-1.5">
+          <motion.div
+            key={s.label}
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              layout: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.3 },
+              y: { duration: 0.3 },
+            }}
+            className="space-y-1.5"
+          >
             <div className="flex items-center justify-between">
               <button
                 type="button"
@@ -124,7 +136,7 @@ export function SentimentProgress({
                 style={{ width: `${s.percent}%` }}
               />
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 

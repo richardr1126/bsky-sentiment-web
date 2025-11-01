@@ -1,13 +1,20 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { PostStreamTabs } from "@/components/PostStreamTabs";
 import { SentimentProgress } from "@/components/SentimentProgress";
 import { TopicDistribution } from "@/components/TopicDistribution";
 import type { Post, SentimentStats, TopicStats } from "@/types/post";
 
-const MAX_DISPLAY_POSTS = 25; // Limit visible posts for better performance
-const MAX_STATS_POSTS = 1000; // Keep more posts for accurate sentiment analysis
+// Lightweight post for stats tracking - only keeps essential data
+interface LightPost {
+  uri: string;
+  sentiment?: { sentiment: "positive" | "negative" | "neutral" };
+  topics?: { topics: string[] };
+}
+
+const MAX_DISPLAY_POSTS = 25; // Full posts shown in UI
+const MAX_STATS_POSTS = 1000; // Lightweight posts for stats
 
 const INITIAL_SENTIMENT_STATS = {
   positive: 0,
@@ -24,32 +31,24 @@ type SentimentFilter = "all" | "positive" | "negative" | "neutral";
 
 export default function Home() {
   const [displayPosts, setDisplayPosts] = useState<Post[]>([]);
-  const [_allPosts, setAllPosts] = useState<Post[]>([]);
+  const [_statsPosts, setStatsPosts] = useState<LightPost[]>([]);
   const [activeSentiment, setActiveSentiment] =
     useState<SentimentFilter>("all");
   const [stats, setStats] = useState<SentimentStats>(INITIAL_SENTIMENT_STATS);
   const [topicStats, setTopicStats] = useState<TopicStats>(INITIAL_TOPIC_STATS);
-  const [duplicateCount, setDuplicateCount] = useState(0);
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
-
-  // Track seen post URIs to prevent duplicates
-  const seenUrisRef = useRef<Set<string>>(new Set());
 
   // Handle sentiment tab change
   const handleTabChange = useCallback(
     (value: string) => {
       setActiveSentiment(value as SentimentFilter);
 
-      // Always clear display posts to show new filtered results
-      setDisplayPosts([]);
-
       // Only reset all data if no topic filter is active
       if (selectedTopic === "all") {
         setStats(INITIAL_SENTIMENT_STATS);
         setTopicStats(INITIAL_TOPIC_STATS);
-        setAllPosts([]);
-        seenUrisRef.current.clear();
-        setDuplicateCount(0);
+        setDisplayPosts([]);
+        setStatsPosts([]);
       }
     },
     [selectedTopic],
@@ -61,36 +60,37 @@ export default function Home() {
       const wasFiltered = selectedTopic !== "all";
       setSelectedTopic(topic);
 
-      // Always clear display posts when changing topic
-      setDisplayPosts([]);
-
       // Only clear all data when going back to "all" from a filtered state
       if (topic === "all" && wasFiltered) {
         setStats(INITIAL_SENTIMENT_STATS);
         setTopicStats(INITIAL_TOPIC_STATS);
-        setAllPosts([]);
-        seenUrisRef.current.clear();
-        setDuplicateCount(0);
+        setDisplayPosts([]);
+        setStatsPosts([]);
       }
     },
     [selectedTopic],
   );
 
   const handlePostReceived = useCallback((post: Post) => {
-    // Check for duplicate post
-    if (seenUrisRef.current.has(post.uri)) {
-      setDuplicateCount((prev) => prev + 1);
-      return; // Skip duplicate posts
-    }
+    // Update lightweight stats posts
+    setStatsPosts((prevPosts) => {
+      // Check for duplicate
+      if (prevPosts.some((p) => p.uri === post.uri)) {
+        return prevPosts;
+      }
 
-    // Add to seen set
-    seenUrisRef.current.add(post.uri);
+      const lightPost: LightPost = {
+        uri: post.uri,
+        sentiment: post.sentiment
+          ? { sentiment: post.sentiment.sentiment }
+          : undefined,
+        topics: post.topics ? { topics: post.topics.topics } : undefined,
+      };
 
-    setAllPosts((prevPosts) => {
-      const newAllPosts = [post, ...prevPosts].slice(0, MAX_STATS_POSTS);
+      const newStatsPosts = [lightPost, ...prevPosts].slice(0, MAX_STATS_POSTS);
 
-      // Calculate sentiment stats from all posts
-      const newStats = newAllPosts.reduce(
+      // Calculate sentiment stats
+      const newStats = newStatsPosts.reduce(
         (acc, p) => {
           if (p.sentiment) {
             acc[p.sentiment.sentiment]++;
@@ -102,9 +102,9 @@ export default function Home() {
       );
       setStats(newStats);
 
-      // Calculate topic stats from all posts
+      // Calculate topic stats
       const newTopicStats: TopicStats = { total: 0 };
-      for (const p of newAllPosts) {
+      for (const p of newStatsPosts) {
         if (p.topics?.topics && p.topics.topics.length > 0) {
           for (const topic of p.topics.topics) {
             newTopicStats[topic] = (newTopicStats[topic] || 0) + 1;
@@ -114,13 +114,17 @@ export default function Home() {
       }
       setTopicStats(newTopicStats);
 
-      return newAllPosts;
+      return newStatsPosts;
     });
 
-    // Update display posts with server-side filtered results
-    setDisplayPosts((prevPosts) =>
-      [post, ...prevPosts].slice(0, MAX_DISPLAY_POSTS),
-    );
+    // Update display posts with full content (server-side filtered)
+    setDisplayPosts((prevPosts) => {
+      // Check for duplicate
+      if (prevPosts.some((p) => p.uri === post.uri)) {
+        return prevPosts;
+      }
+      return [post, ...prevPosts].slice(0, MAX_DISPLAY_POSTS);
+    });
   }, []);
 
   return (
@@ -143,7 +147,6 @@ export default function Home() {
                       stats={stats}
                       onSentimentClick={(sentiment) => {
                         setActiveSentiment(sentiment);
-                        setDisplayPosts([]);
                       }}
                     />
                   </div>
@@ -167,7 +170,6 @@ export default function Home() {
               onTabChange={handleTabChange}
               displayPosts={displayPosts}
               onPostReceived={handlePostReceived}
-              duplicateCount={duplicateCount}
               topicStats={topicStats}
               selectedTopic={selectedTopic}
               onTopicChange={handleTopicChange}

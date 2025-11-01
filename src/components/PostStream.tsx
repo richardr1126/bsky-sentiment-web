@@ -16,7 +16,6 @@ interface PostStreamProps {
   onPostReceived: (post: Post) => void;
   sentimentFilter: SentimentFilter;
   topicFilter?: string;
-  duplicateCount: number;
 }
 
 export function PostStream({
@@ -24,7 +23,6 @@ export function PostStream({
   onPostReceived,
   sentimentFilter,
   topicFilter = "all",
-  duplicateCount,
 }: PostStreamProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -219,12 +217,12 @@ export function PostStream({
       )}
 
       {/* Scrollable posts */}
-      <ScrollArea.Root className="h-[600px]">
+      <ScrollArea.Root className="h-[600px] overflow-hidden">
         <ScrollArea.Viewport
           ref={viewportRef}
-          className="h-full overscroll-contain outline-none"
+          className="h-full overscroll-contain outline-none overflow-x-hidden"
         >
-          <ScrollArea.Content className="flex flex-col">
+          <ScrollArea.Content className="flex flex-col min-w-0">
             {posts.length === 0 ? (
               <div className="flex h-[520px] items-center justify-center">
                 <div className="text-center">
@@ -247,20 +245,9 @@ export function PostStream({
 
       {/* Footer count */}
       <div className="border-t border-border px-4 py-3 text-center text-xs text-text-secondary">
-        <div className="flex items-center justify-center gap-4">
-          <span>
-            Showing {posts.length} recent post{posts.length !== 1 ? "s" : ""}
-          </span>
-          {duplicateCount > 0 && (
-            <>
-              <span>·</span>
-              <span className="text-status-warning">
-                {duplicateCount} duplicate{duplicateCount !== 1 ? "s" : ""}{" "}
-                filtered
-              </span>
-            </>
-          )}
-        </div>
+        <span>
+          Showing {posts.length} recent post{posts.length !== 1 ? "s" : ""}
+        </span>
       </div>
     </div>
   );

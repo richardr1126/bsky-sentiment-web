@@ -106,24 +106,24 @@ export function PostCard({ post }: { post: Post }) {
     : [];
 
   return (
-    <article className="border-b border-border bg-surface px-4 py-3 transition-colors hover:bg-surface-secondary/50">
+    <article className="border-b border-border bg-surface px-4 py-3 transition-colors hover:bg-surface-secondary/50 min-w-0 overflow-hidden">
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 min-w-0">
         <div className="flex-shrink-0">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-brand-gradient-from to-brand-gradient-to text-xs font-semibold text-white">
             {authorShort.slice(0, 2).toUpperCase()}
           </div>
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           {/* Author and sentiment */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-            <div className="flex flex-col gap-1.5 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 min-w-0">
+            <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 min-w-0">
                 <span className="font-bold text-text-primary text-sm truncate">
                   User {authorShort}
                 </span>
-                <div className="flex items-center gap-1.5 text-text-tertiary text-sm">
+                <div className="flex items-center gap-1.5 text-text-tertiary text-sm flex-shrink-0">
                   <span>@{authorShort}</span>
                   <span>·</span>
                   <span>{timeAgo}</span>
@@ -133,28 +133,28 @@ export function PostCard({ post }: { post: Post }) {
               {/* Topics pills - show if available */}
               {post.topics &&
               (post.topics.topics.length > 0 || post.topics.top_topic) ? (
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                   {post.topics.topics.length > 0 ? (
                     <>
                       {post.topics.topics.slice(0, 3).map((topic) => (
                         <div
                           key={topic}
-                          className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-tertiary border border-border"
+                          className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-tertiary border border-border flex-shrink-0"
                         >
-                          <span className="text-xs text-text-secondary capitalize">
+                          <span className="text-xs text-text-secondary capitalize whitespace-nowrap">
                             {topic.replace(/_/g, " ").replace(/&/g, "and")}
                           </span>
                         </div>
                       ))}
                       {post.topics.topics.length > 3 && (
-                        <span className="text-xs text-text-tertiary">
+                        <span className="text-xs text-text-tertiary flex-shrink-0">
                           +{post.topics.topics.length - 3} more
                         </span>
                       )}
                     </>
                   ) : post.topics.top_topic ? (
-                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-tertiary border border-border">
-                      <span className="text-xs text-text-secondary capitalize">
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-tertiary border border-border flex-shrink-0">
+                      <span className="text-xs text-text-secondary capitalize whitespace-nowrap">
                         {post.topics.top_topic
                           .replace(/_/g, " ")
                           .replace(/&/g, "and")}
@@ -166,9 +166,9 @@ export function PostCard({ post }: { post: Post }) {
             </div>
 
             {/* Sentiment badge */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 self-start">
               <div
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-full border ${ui.badgeClasses}`}
+                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full border whitespace-nowrap ${ui.badgeClasses}`}
               >
                 <div
                   className={`w-1.5 h-1.5 rounded-full ${ui.accentBgClass}`}
@@ -179,20 +179,22 @@ export function PostCard({ post }: { post: Post }) {
           </div>
 
           {/* Post text */}
-          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-normal text-text-primary">
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-normal text-text-primary [word-break:break-word]">
             {text}
           </p>
 
           {/* Sentiment pills - compact inline, sorted by highest percentage */}
           {sortedSentiments.length > 0 && (
-            <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <div className="mt-3 flex items-center gap-2 flex-wrap min-w-0">
               {sortedSentiments.map((s) => (
                 <div
                   key={s.label}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${s.bg} border ${s.border}`}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-full flex-shrink-0 ${s.bg} border ${s.border}`}
                 >
                   <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                  <span className={`text-xs font-medium ${s.text}`}>
+                  <span
+                    className={`text-xs font-medium whitespace-nowrap ${s.text}`}
+                  >
                     {s.pct}%
                   </span>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Tooltip } from "@base-ui-components/react/tooltip";
+import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { getTopicColor } from "@/lib/topicColors";
@@ -87,7 +88,18 @@ export function TopicDistribution({
             {topTopics.map((t) => {
               const colorScheme = getTopicColor(t.rawLabel, allTopicNames);
               return (
-                <div key={t.rawLabel} className="space-y-1.5">
+                <motion.div
+                  key={t.rawLabel}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    layout: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.3 },
+                    y: { duration: 0.3 },
+                  }}
+                  className="space-y-1.5"
+                >
                   <div className="flex items-center justify-between">
                     <button
                       type="button"
@@ -119,7 +131,7 @@ export function TopicDistribution({
                       style={{ width: `${t.percent}%` }}
                     />
                   </div>
-                </div>
+                </motion.div>
               );
             })}
 
@@ -133,7 +145,18 @@ export function TopicDistribution({
                 {remainingTopics.map((t) => {
                   const colorScheme = getTopicColor(t.rawLabel, allTopicNames);
                   return (
-                    <div key={t.rawLabel} className="space-y-1.5">
+                    <motion.div
+                      key={t.rawLabel}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        layout: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.3 },
+                        y: { duration: 0.3 },
+                      }}
+                      className="space-y-1.5"
+                    >
                       <div className="flex items-center justify-between">
                         <button
                           type="button"
@@ -165,7 +188,7 @@ export function TopicDistribution({
                           style={{ width: `${t.percent}%` }}
                         />
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>

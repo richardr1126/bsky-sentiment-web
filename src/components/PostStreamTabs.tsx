@@ -1,6 +1,7 @@
 import { Tabs } from "@base-ui-components/react/tabs";
+import { motion } from "framer-motion";
 import { Frown, Layers, Meh, Smile } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getTopicColor } from "@/lib/topicColors";
 import type { Post, TopicStats } from "@/types/post";
 import { PostStream } from "./PostStream";
@@ -12,7 +13,6 @@ interface PostStreamTabsProps {
   onTabChange: (value: string) => void;
   displayPosts: Post[];
   onPostReceived: (post: Post) => void;
-  duplicateCount: number;
   topicStats: TopicStats;
   selectedTopic: string;
   onTopicChange: (topic: string) => void;
@@ -23,18 +23,60 @@ export function PostStreamTabs({
   onTabChange,
   displayPosts,
   onPostReceived,
-  duplicateCount,
   topicStats,
   selectedTopic,
   onTopicChange,
 }: PostStreamTabsProps) {
-  // Extract available topics from topicStats, sorted by count (same as TopicDistribution)
-  const availableTopics = useMemo(() => {
+  // Store topicStats in a ref to access latest value without triggering re-renders
+  const topicStatsRef = useRef(topicStats);
+  topicStatsRef.current = topicStats;
+
+  // Extract available topics from topicStats, sorted by count
+  // Update the sorted order every 5 seconds instead of instantly
+  const [availableTopics, setAvailableTopics] = useState<string[]>(() => {
     return Object.entries(topicStats)
       .filter(([key]) => key !== "total")
-      .sort((a, b) => b[1] - a[1]) // Sort by count descending
+      .sort((a, b) => b[1] - a[1])
       .map(([topic]) => topic);
-  }, [topicStats]);
+  });
+
+  useEffect(() => {
+    const updateTopics = () => {
+      const sorted = Object.entries(topicStatsRef.current)
+        .filter(([key]) => key !== "total")
+        .sort((a, b) => b[1] - a[1])
+        .map(([topic]) => topic);
+      setAvailableTopics(sorted);
+    };
+
+    // Update instantly for the first 5 seconds
+    const instantUpdatesTimeout = setTimeout(() => {
+      // After 4 seconds, switch to 5 second intervals
+      const interval = setInterval(updateTopics, 5000);
+      return () => clearInterval(interval);
+    }, 4000);
+
+    // For the first 4 seconds, update on every topicStats change
+    const _earlyEffect = () => {
+      updateTopics();
+    };
+
+    // Set up listener for topicStats changes during first 4 seconds
+    const earlyInterval = setInterval(() => {
+      updateTopics();
+    }, 500); // Check frequently during initial period
+
+    // Clean up early interval after 4 seconds
+    const cleanupEarly = setTimeout(() => {
+      clearInterval(earlyInterval);
+    }, 4000);
+
+    return () => {
+      clearTimeout(instantUpdatesTimeout);
+      clearInterval(earlyInterval);
+      clearTimeout(cleanupEarly);
+    };
+  }, []); // Empty dependency array - interval runs continuously
 
   const handleTopicChange = useCallback(
     (topic: string) => {
@@ -112,8 +154,17 @@ export function PostStreamTabs({
               const colorScheme = getTopicColor(topic, availableTopics);
               const isSelected = selectedTopic === topic;
               return (
-                <button
+                <motion.button
                   key={topic}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{
+                    layout: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                    scale: { duration: 0.2 },
+                  }}
                   type="button"
                   onClick={() => handleTopicChange(topic)}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-colors ${
@@ -128,7 +179,7 @@ export function PostStreamTabs({
                   <span className="text-xs font-medium capitalize">
                     {topic.replace(/_/g, " ").replace(/&/g, "and")}
                   </span>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -142,7 +193,6 @@ export function PostStreamTabs({
           onPostReceived={onPostReceived}
           sentimentFilter={activeSentiment}
           topicFilter={selectedTopic}
-          duplicateCount={duplicateCount}
         />
       </Tabs.Panel>
     </Tabs.Root>
