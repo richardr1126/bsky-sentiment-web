@@ -217,8 +217,18 @@ Shows real-time analytics using Base UI components:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NATS_URL` | NATS server URL using nats:// protocol | `nats://localhost:4222` |
-| `OUTPUT_STREAM` | JetStream stream name for sentiment results | `bluesky-posts-sentiment` |
-| `OUTPUT_SUBJECT` | Subject pattern for sentiment messages | `bluesky.posts.sentiment` |
+| `OUTPUT_STREAM` | JetStream stream name for sentiment results | `bluesky-posts-enriched` |
+| `OUTPUT_SUBJECT` | Subject pattern for sentiment messages | `bluesky.enriched` |
+
+### Environment File Comparison (.env.example vs .env.prod)
+
+| Variable | .env.example | .env.prod | Notes |
+|----------|-------------|-----------|-------|
+| `NATS_URL` | Examples provided | `nats://nats.nats.svc.cluster.local:4222` | K8s DNS for production |
+| `OUTPUT_STREAM` | Examples provided | `bluesky-posts-enriched` | Match processor output stream |
+| `OUTPUT_SUBJECT` | Examples provided | `bluesky.enriched` | Match processor output subject |
+
+**Before deploying to Kubernetes**, ensure you have created and configured `.env.prod` in the service root directory. The `create-secrets.sh` script will fail if this file is missing.
 
 ## NATS Configuration
 
